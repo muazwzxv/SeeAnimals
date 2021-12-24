@@ -1,8 +1,9 @@
 import io
 import uvicorn
+import uuid
 from fastapi import FastAPI
 from PIL import Image
-from fastapi.datastructures import UploadFile, File
+from fastapi import UploadFile, File
 from yolov5 import *
 from starlette.responses import Response
 
@@ -24,7 +25,7 @@ def process_yolo(file: UploadFile = File(...)):
     file_bytes = file.file.read()
     image = Image.open(io.BytesIO(file_bytes))
 
-    name = f"/data/{str(uuid.uuid4())}.png"
+    name = f"/predicted/{str(uuid.uuid4())}.png"
 
     image.filename = name
     classes, converted = yolov5(image)

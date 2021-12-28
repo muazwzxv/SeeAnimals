@@ -1,10 +1,11 @@
+import base64
 import io
-import uvicorn
 import uuid
 from fastapi import FastAPI
-from PIL import Image
-from fastapi import UploadFile, File
+import json
+from fastapi import UploadFile, File, WebSocketDisconnect, WebSocket
 from yolov5 import *
+from connection import *
 from starlette.responses import Response
 
 app = FastAPI(
@@ -12,6 +13,39 @@ app = FastAPI(
     description="visit port 8080/docs for the FastAPI documentation",
     version="0.01"
 )
+
+connection = ConnectionManager()
+
+@app.websocket(f"/ws/{id}")
+async def process_yolo_ws(websocket: WebSocket, id: int):
+    await connection.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+
+            # convert to PIL image
+            find = data.find(",") + 1
+            image = data[find:]
+            dec = base64.b64decode(image + "===")
+            image = Image.open(io.BytesIO(dec)).convert("RGB")
+
+            # Process the image
+            name = f"/{str(uuid.uuid4())}.png"
+
+            image.filename = name
+            classes, converted_img = yolov5(image)
+
+            result = {
+                "prediction": json.dumps(classes),
+                "output": base64_encode_img(converted_img),
+            }
+
+            # Send back the result
+            await connection.send_message(json.dumps(result), websocket)
+    except WebSocketDisconnect:
+        connection.disconnect(websocket)
+        await connection.broadcast(f"Client #{id} has left the server")
+
 
 
 @app.get("/")
@@ -36,3 +70,13 @@ def process_yolo(file: UploadFile = File(...)):
     converted.save(bytes_io, format="png")
 
     return Response(bytes_io.getvalue(), media_type="image/png")
+
+
+def base64_encode_img(img):
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    buffered.seek(0)
+    img_byte = buffered.getvalue()
+    encoded_img = "data:image/png;base64," + base64.b64encode(img_byte).decode()
+    return encoded_img
+

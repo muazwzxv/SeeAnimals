@@ -15,3 +15,8 @@ web-build/
 
 **/predicted/***
 **/__pycache__/***
+
+**/*.png
+
+
+

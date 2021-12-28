@@ -25,7 +25,7 @@ def process_yolo(file: UploadFile = File(...)):
     file_bytes = file.file.read()
     image = Image.open(io.BytesIO(file_bytes))
 
-    name = f"/predicted/{str(uuid.uuid4())}.png"
+    name = f"{str(uuid.uuid4())}.png"
 
     image.filename = name
     classes, converted = yolov5(image)

@@ -18,9 +18,9 @@ export const Header = (props: IHeader) => {
 const styles = StyleSheet.create({
   header: {
     width: "100%",
-    height: 80,
-    paddingTop: 50,
-    paddingBottom: 10,
+    height: 90,
+    paddingTop: 40,
+    paddingBottom: 0,
     paddingLeft: 10,
     backgroundColor: Colors.primary,
     alignItems: "flex-start",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ICameraDims, ICameraPermissions } from "../types";
 import { Camera, CameraCapturedPicture } from "expo-camera";
 import {
@@ -10,8 +10,6 @@ import {
   Image,
 } from "react-native";
 import Colors from "../constants/colors";
-
-interface IViewer {}
 
 let cameraref: Camera | null;
 
@@ -29,10 +27,14 @@ export const Viewer = () => {
   const [hasPermission, setHasPermission] = useState<ICameraPermissions | null>(
     null
   );
+
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [cameraDims, setCameraDims] = useState<ICameraDims | null>();
   const [capturedImage, setCapturedImage] =
     useState<CameraCapturedPicture | null>();
+  const [isPaused, setPaused] = useState<boolean>(false);
+
+  const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -41,18 +43,60 @@ export const Viewer = () => {
     })();
   }, []);
 
-  if (hasPermission === null) return <View />;
-  if (hasPermission.allowed === false)
-    return <Text> No Access to Camera </Text>;
+  useEffect(() => {
+    const client = Date.now();
+    const url = `ws://127.0.0.1:8000/ws/${client}`;
+    console.log("To connect here", url);
 
-  const resetInput = () => {
-    console.log("resetting input");
+    ws.current = new WebSocket(url);
+    ws.current.binaryType = "blob";
+
+    ws.current.onopen = () => console.log("Websocket open");
+    ws.current.onerror = (err) => console.log("websocket error", err);
+    ws.current.close = () => console.log("Websocket closed");
+
+    return () => {
+      ws.current?.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ws.current) return;
+
+    ws.current.onmessage = (event) => {
+      if (isPaused) return;
+      const msg = JSON.parse(event.data);
+      console.log("Message from server", msg);
+
+      // setCapturedImage(msg.output);
+    };
+  }, [isPaused]);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission.allowed === false) {
+    return <Text> No Access to Camera </Text>;
+  }
+
+  const sendMessage = (msg: CameraCapturedPicture | undefined) => {
+    if (!ws.current) return;
+    let stringified = JSON.stringify(msg?.base64);
+    console.log(stringified, "this is the stringified");
+
+    ws.current.send(stringified);
+  };
+
+  const resetHandler = () => {
+    setCapturedImage(null);
   };
 
   const imageHandler = () => {
     captureHandler().then((image) => {
       setCapturedImage(image); // check for the uri
-      console.log("Making API call...");
+
+      sendMessage(image);
+
       // getBoundingBoxes(image.base64.trim().replace(/\s/g, "+"));
     });
   };
@@ -68,7 +112,7 @@ export const Viewer = () => {
         {capturedImage ? (
           <TouchableWithoutFeedback
             onPress={() => {
-              console.log("event is triggered here");
+              console.log("event is triggered here", capturedImage);
             }}
           >
             <Image source={{ uri: capturedImage.uri }} style={styles.camera} />
@@ -87,20 +131,21 @@ export const Viewer = () => {
           <TouchableOpacity
             style={styles.button}
             activeOpacity={0.4}
-            // onPress={() => {
-            //   if (type === Camera.Constants.Type.front) {
-            //     setType(Camera.Constants.Type.front);
-            //   } else {
-            //     setType(Camera.Constants.Type.back);
-            //   }
-            // }}
+            onPress={() => {
+              console.log("attempt to flip camera");
+              setType(
+                type === Camera.Constants.Type.back
+                  ? Camera.Constants.Type.front
+                  : Camera.Constants.Type.back
+              );
+            }}
           >
             <Text style={styles.text}> Flip </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.button}
-            // onPress={imageHandler}
+            onPress={imageHandler}
             activeOpacity={0.4}
           >
             <Text style={styles.text}> Capture </Text>
@@ -108,7 +153,7 @@ export const Viewer = () => {
 
           <TouchableOpacity
             style={styles.button}
-            // onPress={resetInput}
+            onPress={resetHandler}
             activeOpacity={0.4}
           >
             <Text style={styles.text}> Reset </Text>

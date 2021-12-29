@@ -10,7 +10,7 @@ interface IHeader {
 export const Header = (props: IHeader) => {
   return (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>{props.title}</Text>
+      <Text style={styles.headerTitle}> {props.title} </Text>
     </View>
   );
 };

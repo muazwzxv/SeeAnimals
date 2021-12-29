@@ -1,79 +1,15 @@
-import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableWithoutFeedback,
-  Image,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { Camera } from "expo-camera";
-import { useEffect, useState } from "react";
+import React from "react";
 import { Header } from "./components/header";
 import Colors from "./constants/colors";
-import { ICameraDims, ICameraPermissions } from "./types";
-
-let cameraref: any;
-
-const captureHandler = async () => {
-  if (cameraref !== null) {
-    const image = await cameraref;
-  }
-};
+import { Viewer } from "./components/viewer";
 
 export default function App() {
-  const [hasPermission, setHasPermission] = useState<ICameraPermissions | null>(
-    null
-  );
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const [cameraDims, setCameraDims] = useState<ICameraDims | null>();
-  const [capturedImage, setCaptureImage] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      if (status === "granted") setHasPermission({ allowed: true, status });
-    })();
-  }, []);
-
-  if (hasPermission === null) return <View />;
-  if (hasPermission.allowed === false) return <Text> No Access to Camera</Text>;
-
   return (
     <View style={styles.container}>
       <Header title="SeeAnimals" />
-      <View style={styles.screen}>
-        <View
-          style={styles.camera}
-          onLayout={(event) => {
-            setCameraDims({ event: event.nativeEvent.layout });
-          }}
-        >
-          {/* {capturedImage ? (
-          <TouchableWithoutFeedback
-              onPress={() => {
-                // trigger event
-                console.log("event is triggered here")
-                
-              }}
-          >
-              <Image
-                  source={{ uri: capturedImage }}
-                  style={styles.camera}
-              />
-          </TouchableWithoutFeedback>
-        ) : (
-            <Camera
-                style={styles.camera}
-                type={type}
-                ref={(r) => {
-                    cameraref = r;
-                }}
-            ></Camera>
-        )}  */}
-          <View></View>
-        </View>
-      </View>
+      <Viewer />
     </View>
   );
 }

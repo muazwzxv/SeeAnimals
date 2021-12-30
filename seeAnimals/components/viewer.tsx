@@ -10,6 +10,7 @@ import {
   Image,
 } from "react-native";
 import Colors from "../constants/colors";
+import { IMessageEvent, w3cwebsocket as W3CWebSocket } from "websocket";
 
 let cameraref: Camera | null;
 
@@ -34,7 +35,17 @@ export const Viewer = () => {
     useState<CameraCapturedPicture | null>();
   const [isPaused, setPaused] = useState<boolean>(false);
 
-  const ws = useRef<WebSocket | null>(null);
+  const ws = useRef<W3CWebSocket | null>(null);
+
+  useEffect(() => {
+    fetch("http://192.168.1.103:8080")
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -45,11 +56,10 @@ export const Viewer = () => {
 
   useEffect(() => {
     const client = Date.now();
-    const url = `ws://127.0.0.1:8000/ws/${client}`;
+    const url = `ws://192.168.1.103:8080/ws/${client}`;
     console.log("To connect here", url);
 
-    ws.current = new WebSocket(url);
-    ws.current.binaryType = "blob";
+    ws.current = new W3CWebSocket(url);
 
     ws.current.onopen = () => console.log("Websocket open");
     ws.current.onerror = (err) => console.log("websocket error", err);
@@ -63,9 +73,9 @@ export const Viewer = () => {
   useEffect(() => {
     if (!ws.current) return;
 
-    ws.current.onmessage = (event) => {
+    ws.current.onmessage = (event: IMessageEvent) => {
       if (isPaused) return;
-      const msg = JSON.parse(event.data);
+      const msg = JSON.parse(event.data.toString());
       console.log("Message from server", msg);
 
       // setCapturedImage(msg.output);

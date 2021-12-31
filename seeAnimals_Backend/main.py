@@ -1,5 +1,6 @@
 import base64
 import io
+import uvicorn
 import uuid
 from fastapi import FastAPI
 import json
@@ -9,16 +10,18 @@ from connection import *
 from starlette.responses import Response
 
 app = FastAPI(
-    title="Serving Yolov5",
+    title="Serving Yolo V5",
     description="visit port 8080/docs for the FastAPI documentation",
     version="0.01"
 )
 
 connection = ConnectionManager()
 
+
 @app.websocket(f"/ws/{id}")
 async def process_yolo_ws(websocket: WebSocket, id: int):
     await connection.connect(websocket)
+    print(f"New Client connected: {websocket}")
     try:
         while True:
             data = await websocket.receive_text()
@@ -47,7 +50,6 @@ async def process_yolo_ws(websocket: WebSocket, id: int):
         await connection.broadcast(f"Client #{id} has left the server")
 
 
-
 @app.get("/")
 async def home():
     return {"message": "Hello world"}
@@ -69,7 +71,8 @@ def process_yolo(file: UploadFile = File(...)):
     converted.save(name)
     converted.save(bytes_io, format="png")
 
-    return Response(bytes_io.getvalue(), media_type="image/png")
+    # return Response(bytes_io.getvalue(), media_type="image/png")
+    return {"classes": classes}
 
 
 def base64_encode_img(img):
@@ -77,6 +80,10 @@ def base64_encode_img(img):
     img.save(buffered, format="PNG")
     buffered.seek(0)
     img_byte = buffered.getvalue()
-    encoded_img = "data:image/png;base64," + base64.b64encode(img_byte).decode()
+    encoded_img = "data:image/png;base64," + \
+        base64.b64encode(img_byte).decode()
     return encoded_img
 
+
+if __name__ == '__main__':
+    uvicorn.run(app, port=8080, host='0.0.0.0')

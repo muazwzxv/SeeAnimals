@@ -155,6 +155,7 @@ export const Viewer = () => {
 
           <TouchableOpacity
             style={styles.button}
+            // On press snap image action
             onPress={imageHandler}
             activeOpacity={0.4}
           >
@@ -163,6 +164,7 @@ export const Viewer = () => {
 
           <TouchableOpacity
             style={styles.button}
+            // On press reset action
             onPress={resetHandler}
             activeOpacity={0.4}
           >

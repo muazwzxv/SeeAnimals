@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ICameraDims, ICameraPermissions } from "../types";
+import { ICameraDims, ICameraPermissions, SocketResponse } from "../types";
 import { Camera, CameraCapturedPicture } from "expo-camera";
 import {
   View,
@@ -9,7 +9,9 @@ import {
   TouchableWithoutFeedback,
   Image,
 } from "react-native";
+import { FlatGrid } from "react-native-super-grid";
 import Colors from "../constants/colors";
+import colors from "../constants/colors";
 
 let cameraref: Camera | null;
 
@@ -33,6 +35,7 @@ export const Viewer = () => {
   const [capturedImage, setCapturedImage] =
     useState<CameraCapturedPicture | null>();
   const [isPaused, setPaused] = useState<boolean>(false);
+  const [predicted, setPredicted] = useState<SocketResponse | null>(null);
 
   const ws = useRef<WebSocket | null>(null);
 
@@ -74,8 +77,12 @@ export const Viewer = () => {
 
     ws.current.onmessage = (event) => {
       if (isPaused) return;
-      const msg = JSON.parse(event.data.toString());
-      console.log("Message from server", msg);
+      const msg = JSON.parse(event.data);
+      const resp: SocketResponse = {
+        prediction: msg["prediction"],
+      };
+      setPredicted(resp);
+      console.log("predicted", event.data);
 
       // setCapturedImage(msg.output);
     };
@@ -91,23 +98,27 @@ export const Viewer = () => {
   const sendMessage = (msg: CameraCapturedPicture | undefined) => {
     if (!ws.current) return;
     let stringified = JSON.stringify(msg?.base64);
-    console.log(stringified, "this is the stringified");
 
     ws.current.send(stringified);
   };
 
   const resetHandler = () => {
+    setPredicted(null);
     setCapturedImage(null);
   };
 
   const imageHandler = () => {
-    captureHandler().then((image) => {
-      setCapturedImage(image); // check for the uri
+    captureHandler()
+      .then((image) => {
+        setCapturedImage(image); // check for the uri
 
-      sendMessage(image);
+        sendMessage(image);
 
-      // getBoundingBoxes(image.base64.trim().replace(/\s/g, "+"));
-    });
+        // getBoundingBoxes(image.base64.trim().replace(/\s/g, "+"));
+      })
+      .catch((err) => {
+        console.log("error from image handler", err);
+      });
   };
 
   return (
@@ -121,7 +132,7 @@ export const Viewer = () => {
         {capturedImage ? (
           <TouchableWithoutFeedback
             onPress={() => {
-              console.log("event is triggered here", capturedImage);
+              console.log("event is triggered here");
             }}
           >
             <Image source={{ uri: capturedImage.uri }} style={styles.camera} />
@@ -170,6 +181,24 @@ export const Viewer = () => {
             <Text style={styles.text}> Reset </Text>
           </TouchableOpacity>
         </View>
+
+        {/* {predicted && (
+          <FlatGrid
+            staticDimension={80}
+            data={predicted.prediction}
+            style={styles.predictions}
+            spacing={20}
+            itemDimension={250}
+            horizontal={true}
+            renderItem={({ item }) => (
+              <View
+                style={[styles.itemContainer, { backgroundColor: "#7f8c8d" }]}
+              >
+                <Text style={styles.itemName}>{item}</Text>
+              </View>
+            )}
+          />
+        )} */}
       </View>
     </View>
   );

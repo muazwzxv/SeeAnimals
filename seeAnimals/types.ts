@@ -8,3 +8,7 @@ export interface ICameraPermissions {
 export interface ICameraDims {
   event: LayoutRectangle;
 }
+
+export interface SocketResponse {
+  prediction: string[];
+}

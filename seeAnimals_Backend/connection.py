@@ -12,7 +12,7 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connection.remove(websocket)
 
-    async def sendMessage(self, message: str, websocket: WebSocket):
+    async def send_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
     async def broadcast(self, msg: str):

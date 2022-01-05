@@ -42,6 +42,7 @@ async def process_yolo_ws(websocket: WebSocket, id: int):
                 "prediction": json.dumps(classes),
                 # "output": base64_encode_img(converted_img),
             }
+            print(result)
 
             # Send back the result
             await connection.send_message(json.dumps(result), websocket)

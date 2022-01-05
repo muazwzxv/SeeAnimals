@@ -18,7 +18,7 @@ app = FastAPI(
 connection = ConnectionManager()
 
 
-@app.websocket(f"/ws/{id}")
+@app.websocket("/ws/{id}")
 async def process_yolo_ws(websocket: WebSocket, id: int):
     await connection.connect(websocket)
     print(f"New Client connected: {websocket}")

@@ -72,8 +72,8 @@ def process_yolo(file: UploadFile = File(...)):
     converted.save(name)
     converted.save(bytes_io, format="png")
 
-    # return Response(bytes_io.getvalue(), media_type="image/png")
-    return {"classes": classes}
+    return Response(bytes_io.getvalue(), media_type="image/png")
+    # return {"classes": classes}
 
 
 def base64_encode_img(img):

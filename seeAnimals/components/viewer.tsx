@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { FlatGrid } from "react-native-super-grid";
 import Colors from "../constants/colors";
-import colors from "../constants/colors";
 
 let cameraref: Camera | null;
 
@@ -35,7 +34,7 @@ export const Viewer = () => {
   const [capturedImage, setCapturedImage] =
     useState<CameraCapturedPicture | null>();
   const [isPaused, setPaused] = useState<boolean>(false);
-  const [predicted, setPredicted] = useState<SocketResponse | null>(null);
+  const [predicted, setPredicted] = useState<string[]>([]);
 
   const ws = useRef<WebSocket | null>(null);
 
@@ -78,11 +77,10 @@ export const Viewer = () => {
     ws.current.onmessage = (event) => {
       if (isPaused) return;
       const msg = JSON.parse(event.data);
-      const resp: SocketResponse = {
-        prediction: msg["prediction"],
-      };
-      setPredicted(resp);
-      console.log("predicted", event.data);
+      setPredicted(msg["prediction"]);
+
+      console.log("predicted", msg["prediction"]);
+      console.log("state", predicted);
 
       // setCapturedImage(msg.output);
     };
@@ -91,6 +89,7 @@ export const Viewer = () => {
   if (hasPermission === null) {
     return <View />;
   }
+
   if (hasPermission.allowed === false) {
     return <Text> No Access to Camera </Text>;
   }
@@ -103,7 +102,6 @@ export const Viewer = () => {
   };
 
   const resetHandler = () => {
-    setPredicted(null);
     setCapturedImage(null);
   };
 
@@ -182,23 +180,27 @@ export const Viewer = () => {
           </TouchableOpacity>
         </View>
 
-        {/* {predicted && (
+        <Text>{"\n"}</Text>
+        {predicted && (
           <FlatGrid
             staticDimension={80}
-            data={predicted.prediction}
-            style={styles.predictions}
-            spacing={20}
+            data={[predicted]}
+            // style={styles.predictions}
+            spacing={30}
             itemDimension={250}
             horizontal={true}
             renderItem={({ item }) => (
               <View
-                style={[styles.itemContainer, { backgroundColor: "#7f8c8d" }]}
+                style={[
+                  styles.itemContainer,
+                  { backgroundColor: "#7f8c8d", elevation: 3 },
+                ]}
               >
                 <Text style={styles.itemName}>{item}</Text>
               </View>
             )}
           />
-        )} */}
+        )}
       </View>
     </View>
   );
@@ -259,7 +261,7 @@ const styles = StyleSheet.create({
 
   buttonContainer: {
     flex: 1,
-    width: "90%",
+    width: "100%",
     height: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -269,13 +271,14 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "rgb(250,250,250)",
-    width: 95,
-    height: 45,
+    width: 100,
+    height: 60,
     paddingHorizontal: 20,
+    paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 10,
-    borderWidth: 1,
+    borderRadius: 20,
+    borderWidth: 3,
     borderColor: Colors.button,
     elevation: 4,
   },

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { FlatGrid } from "react-native-super-grid";
 import Colors from "../constants/colors";
+import { API } from "../constants/api";
 
 let cameraref: Camera | null;
 
@@ -57,7 +58,7 @@ export const Viewer = () => {
 
   useEffect(() => {
     const client = Date.now();
-    const url = `ws://192.168.1.103:8080/ws/${client}`;
+    const url = `${API.WS_SERVER}${client}`;
     console.log("To connect here", url);
 
     ws.current = new WebSocket(url);

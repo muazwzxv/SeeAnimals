@@ -8,6 +8,7 @@ from fastapi import UploadFile, File, WebSocketDisconnect, WebSocket
 from yolov5 import *
 from connection import *
 from starlette.responses import Response
+import requests
 
 app = FastAPI(
     title="Serving Yolo V5",
@@ -16,6 +17,17 @@ app = FastAPI(
 )
 
 connection = ConnectionManager()
+
+
+def postToStore(result):
+    payload = {
+        "class": result.get("class"),
+        "accuracy": result.get("prediction")
+    }
+    res = requests.post("http://localhost:4444/api/record", data=payload)
+    if res.ok == True:
+        print("Request is okay")
+    pritn("Request is faulty")
 
 
 @app.websocket("/ws/{id}")
@@ -42,7 +54,10 @@ async def process_yolo_ws(websocket: WebSocket, id: int):
                 "prediction": json.dumps(classes),
                 # "output": base64_encode_img(converted_img),
             }
+
             print(result)
+            # Post to store
+            postToStore(result)
 
             # Send back the result
             await connection.send_message(json.dumps(result), websocket)

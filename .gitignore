@@ -17,6 +17,7 @@ web-build/
 **/__pycache__/***
 
 **/*.png
+**/config.yml
 
 
 

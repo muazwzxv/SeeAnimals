@@ -1,0 +1,11 @@
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Println("hehe")
+	// app := fiber.New()
+
+}

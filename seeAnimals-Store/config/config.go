@@ -14,7 +14,7 @@ type Config struct {
 
 func new() Config {
 	reader := viper.New()
-	reader.AddConfigPath("./")
+	reader.AddConfigPath("./seeAnimals-Store/")
 	reader.SetConfigFile("config.yml")
 
 	if err := reader.ReadInConfig(); err != nil {
@@ -39,28 +39,19 @@ func (c *Config) readEnv(key string) string {
 
 func (c *Config) FetchDatabaseConfig() *DatabaseConfig {
 
-	port := c.reader.GetInt("Development.Database.Port")
+	port := c.reader.GetInt("Database.Port")
 
 	return &DatabaseConfig{
-		User:         c.readEnv("Development.Database.User"),
-		Password:     c.readEnv("Development.Database.Password"),
-		Host:         c.readEnv("Development.Database.Host"),
-		DatabaseName: c.readEnv("Development.Database.Name"),
+		User:         c.readEnv("Database.User"),
+		Password:     c.readEnv("Database.Password"),
+		Host:         c.readEnv("Database.Host"),
+		DatabaseName: c.readEnv("Database.Name"),
 		Port:         port,
 	}
-
 }
 
 func (c *Config) FetchServerPort() uint64 {
 	return c.reader.GetUint64("Server.Port")
-}
-
-func (c *Config) GetJWTSecret() string {
-	return c.reader.GetString("JWT.Secret")
-}
-
-func (c *Config) GetBucketName() string {
-	return c.reader.GetString("Oracle.BucketName")
 }
 
 func (c *Config) isInstantiated() bool {

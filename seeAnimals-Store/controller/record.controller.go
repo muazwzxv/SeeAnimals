@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"muazwzxv/m/model"
 	"muazwzxv/m/service"
 	"net/http"
@@ -19,7 +20,20 @@ func NewRecordController() *RecordRepository {
 }
 
 func (r *RecordRepository) GetAll(ctx *fiber.Ctx) error {
-	return nil
+	var record model.Record
+	if records, err := record.GetAll(r.gorm); err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "Something wrong happened",
+			"error":   err.Error,
+		})
+	} else {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{
+			"success": true,
+			"message": "All records",
+			"data":    records,
+		})
+	}
 }
 
 func (r *RecordRepository) GetById(ctx *fiber.Ctx) error {
@@ -31,7 +45,11 @@ func (r *RecordRepository) GetById(ctx *fiber.Ctx) error {
 			"error":   err.Error,
 		})
 	}
-	return nil
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"data":    record,
+	})
 }
 
 func (r *RecordRepository) Create(ctx *fiber.Ctx) error {
@@ -46,6 +64,7 @@ func (r *RecordRepository) Create(ctx *fiber.Ctx) error {
 		})
 	}
 
+	log.Println(record)
 	err := record.Create(r.gorm)
 	if err != nil {
 		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
@@ -58,7 +77,7 @@ func (r *RecordRepository) Create(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Created",
-		"record":  record,
+		"data":    record,
 	})
 
 }

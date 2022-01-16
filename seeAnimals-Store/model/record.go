@@ -7,9 +7,9 @@ import (
 )
 
 type Record struct {
-	ID        uint `gorm:"primaryKey"`
-	Class     string
-	Accuracy  float64
+	ID        uint    `gorm:"primaryKey" json:"id"`
+	Class     string  `json:"class"`
+	Accuracy  float64 `json:"accuracy"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

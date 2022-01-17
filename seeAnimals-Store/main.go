@@ -17,7 +17,6 @@ import (
 )
 
 func main() {
-	fmt.Println("hehe")
 	app := fiber.New()
 
 	if err := service.GetGormInstance().Migrate(); err != nil {

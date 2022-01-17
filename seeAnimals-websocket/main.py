@@ -56,6 +56,7 @@ async def process_yolo_ws(websocket: WebSocket, id: int):
             }
 
             print(result)
+
             # Post to store
             postToStore(result)
 

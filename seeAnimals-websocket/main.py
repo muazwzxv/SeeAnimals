@@ -58,7 +58,7 @@ async def process_yolo_ws(websocket: WebSocket, id: int):
             print(result)
 
             # Post to store
-            postToStore(result)
+            # postToStore(result)
 
             # Send back the result
             await connection.send_message(json.dumps(result), websocket)

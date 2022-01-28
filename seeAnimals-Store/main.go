@@ -24,15 +24,12 @@ func main() {
 	}
 
 	setupMiddleware(app)
-
 	setupRouter(app)
 
 	c := make(chan os.Signal, 1)
 	// Notify channel if interrup or termination signal is sent
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
 	go func() {
-
 		_ = <-c
 		fmt.Println("Gracefully shutting down ....")
 		_ = app.Shutdown()
@@ -48,7 +45,6 @@ func main() {
 	service.GetGormInstance().GormShutDown()
 
 	fmt.Println("Shutdown Complete !")
-
 }
 
 func setupMiddleware(app *fiber.App) {

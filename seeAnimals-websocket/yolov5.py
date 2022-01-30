@@ -19,6 +19,7 @@ def yolov5(img):
     results = model(img)
 
     detected = []
+    confidence = []
     names = results.names
     if results.pred is not None:
         pred = results.pred[0]

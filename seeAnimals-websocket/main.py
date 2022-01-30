@@ -55,6 +55,11 @@ async def process_yolo_ws(websocket: WebSocket, id: int):
                 # "output": base64_encode_img(converted_img),
             }
 
+            # tostore = {
+            #     "class": "",
+            #     "accuracy":  ""
+            # }
+
             print(result)
 
             # Post to store

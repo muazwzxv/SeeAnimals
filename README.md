@@ -36,4 +36,6 @@ Muaz: Yes it is, but the server is also the place I load my model, I use Python 
 
 Muaz: Yes i know, HAHAHHAHA. Submit a pull request then, i would love to see new design
 
+- Where is the model file?
 
+Muaz: Not in the repo unfortunately, do lemme know if you want it
